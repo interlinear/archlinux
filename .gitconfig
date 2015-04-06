@@ -1,0 +1,7 @@
+[user]
+	email = interlinear@gmail.com
+	name = interlinear
+[core]
+	editor = vim
+[push]
+	default = simple

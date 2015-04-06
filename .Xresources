@@ -1,0 +1,13 @@
+XTerm*termName: xterm-256color
+XTerm*locale: true
+XTerm*reverseVideo: on
+XTerm*metaSendsEscape: true
+XTerm*savelines: 8192
+XTerm*VT100.translations: #override <Btn1Up>: select-end(PRIMARY, CLIPBOARD, CUTBUFFER0)
+! Forbid bold font faces: bold type is light blue
+XTerm*colorBDMode: true
+XTerm*colorBD: rgb:e4/e4/e4
+!82/a4/d3
+! Do not underscore text, underscoed text is white
+XTerm*colorULMode: true
+XTerm*colorUL: rgb:e4/e4/e4

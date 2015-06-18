@@ -1,0 +1,87 @@
+if 0 | endif
+
+if has('vim_starting')
+	if &compatible
+		set nocompatible " Be iMproved
+	endif
+
+	" Required
+	set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif
+
+" Required
+call neobundle#begin(expand('~/.vim/bundle'))
+
+" Let NeoBundle manage NeoBundle
+" Required
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+" Refer to |:NeoBundle-examples|.
+" Note: You don't set neobunle setting in .gvimrc
+
+" original repos on github
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'Lokaltog/vim-easymotion'
+NeoBundle 'rstacruz/sparkup', {'rtp': 'vim/'}
+NeoBundle 'tpope/vim-rails.git'
+" vim-scripts repos
+NeoBundle 'L9'
+NeoBundle 'FuzzyFinder'
+NeoBundle 'Python-2.x-Standard-Library-Reference'
+NeoBundle 'Python-3.x-Standard-Library-Reference'
+NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'ack.vim'
+NeoBundle 'nerdtree-ack'
+NeoBundle 'FindInNERDTree'
+NeoBundle 'Color-Sampler-Pack'
+NeoBundle 'CCTree'
+NeoBundle 'vim-flake8'
+"NeoBundle 'PySmell'
+NeoBundle 'Tagbar'
+"NeoBundle 'SuperTab-continued.'
+NeoBundle 'The-NERD-Commenter'
+NeoBundle 'jQuery'
+" non github repos
+NeoBundle 'git://git.wincent.com/command-t.git'
+NeoBundle 'OpenGLSL'
+NeoBundle 'glsl.vim'
+NeoBundle 'hints_opengl.vim'
+NeoBundle 'Syntastic'
+NeoBundle 'taglist-plus'
+"NeoBundle 'DirDiff.vim'
+NeoBundle 'Rykka/riv.vim'
+NeoBundle 'Valloric/YouCompleteMe'
+"NeoBundle 'zhaocai/GoldenView.Vim'
+"NeoBundle 'session.vim'
+NeoBundle 'rking/ag.vim'
+NeoBundle 'bling/vim-airline'
+NeoBundle 'davidhalter/jedi-vim'
+NeoBundle 'ervandew/supertab'
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'avakhov/vim-yaml'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'trapd00r/neverland-vim-theme'
+call neobundle#end()
+
+" Required
+filetype plugin indent on
+
+" If there are uninstalled bundles found on startup,
+" this will conviniently prompt you to install them.
+NeoBundleCheck
+
+set t_Co=256 " 256 colors
+set background=dark
+syntax on
+
+" commandline history
+set history=1000
+
+" some weird stuff to make it faster
+set nocursorcolumn
+set nocursorline
+set wildmenu            " completion with menu
+set number
+
+colorscheme neverland
+set laststatus=2

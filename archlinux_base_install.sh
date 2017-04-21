@@ -1,6 +1,6 @@
 #!/bin/zsh -xv
 
-# This script its my attempt to automate installation of Archlinux using its
+# This script is my attempt to automate installation of Archlinux using its
 # installation media.
 # What I need:
 # Simply a scripted version of the installation guide. Just simple write-up
@@ -28,16 +28,22 @@ echo "Partitons on /dev/sda:"
 sgdisk -p /dev/sda
 
 echo "Partitioning /dev/sda:"
-#parted -s /dev/sda -- mklabel gpt\
-#       mkpart primary fat32 4MiB 518MiB\
-#       mkpart primary btrfs 518MiB -1s
 echo "Doing stuff..."
 sgdisk -og /dev/sda
 
-sgdisk -n 1:0:+304M -t 1:0xef00 -c 1:"EFI_system_partition" /dev/sda
-sgdisk -n 2:0:0 -t 2:0x8300 -c 1:"ArchLinux" /dev/sda
+if [[ -d /sys/firmware/efi/efivars ]]; then
+    echo "Creating UEFI system partition (ESP)"
+    # UEFI needs a larger partition
+    sgdisk -n 1:0:+304M -t 1:0xef00 -c 1:"EFI_system_partition" /dev/sda
+else
+    echo "Creating bios boot partition"
+    # bios gpt needs a BIOS boot partition of size at least 31KiB but I choose 4MiB
+    sgdisk -n 1:0:+4M -t 1:0xef02 -c 1:"BIOS_boot_partition" /dev/sda
+fi
 
-echo "Partitons on /dev/sda:"
+sgdisk -n 2:0:0 -t 2:0x8300 -c 2:"ArchLinux" /dev/sda
+
+echo "Partitions on /dev/sda:"
 sgdisk -p /dev/sda
 
 echo "Yes, this worked"
@@ -59,7 +65,10 @@ mount -o defaults,noatime,discard,ssd,space_cache,compress=lzo,subvol=__active /
 sed -ie 's/^Server/#Server/g' /etc/pacman.d/mirrorlist
 sed -ie '/## Norway/{n;s/^#Server/Server/}' /etc/pacman.d/mirrorlist
 
-pacstrap /mnt base grub btrfs-progs vim dialog efibootmgr
+pacstrap /mnt base grub btrfs-progs vim dialog
+if [[ -d /sys/firmware/efi/efivars ]]; then
+    pacstrap /mnt efibootmgr
+fi
 
 arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 arch-chroot /mnt hwclock --systohc
@@ -77,20 +86,32 @@ arch-chroot /mnt passwd << EOF
 root
 root
 EOF
-mkdir -p /mnt/boot/efi
-mount /dev/sda1 /mnt/boot/efi
+
+if [[ -d /sys/firmware/efi/efivars ]]; then
+    mkdir -p /mnt/boot/efi
+    mount /dev/sda1 /mnt/boot/efi
+fi
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub
+if [[ -d /sys/firmware/efi/efivars ]]; then
+    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub
+else
+    arch-chroot /mnt grub-install --target=i386-pc /dev/sda
+fi
+
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 if [[ -z $(grep hypervisor /proc/cpuinfo) ]]; then
     echo "Running on bare metal"
 else
     echo "Running in a virtual machine, will create startup.nsh"
-    echo 'fs0:\EFI\grub\grubx64.efi' > /mnt/boot/efi/startup.nsh
+    if [[ -d /sys/firmware/efi/efivars ]]; then
+        echo 'fs0:\EFI\grub\grubx64.efi' > /mnt/boot/efi/startup.nsh
+    fi
 fi
 
-umount /mnt/boot/efi
+if [[ -d /sys/firmware/efi/efivars ]]; then
+    umount /mnt/boot/efi
+fi
 umount /mnt
